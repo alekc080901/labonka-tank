@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.maps.MapRenderer;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Interpolation;
+import ru.mipt.bit.platformer.game.entities.Coordinates;
 import ru.mipt.bit.platformer.util.TileMovement;
 
 import java.util.List;
@@ -30,8 +31,9 @@ public class LevelRenderer {
         this.tileMovement = new TileMovement(level.getGroundLayer(), Interpolation.smooth);
 
         this.levelEntities = levelEntities;
-        for (LevelEntity object : levelEntities) {
-            moveRectangleAtTileCenter(level.getGroundLayer(), object.getRectangle(), object.getCoordinates());
+        for (LevelEntity entity : levelEntities) {
+            Coordinates coords = entity.getCoordinates();
+            moveRectangleAtTileCenter(level.getGroundLayer(), entity.getRectangle(), new GridPoint2(coords.x, coords.y));
         }
     }
 
@@ -49,18 +51,17 @@ public class LevelRenderer {
 
         // start recording all drawing commands
         batch.begin();
-
-        for (LevelEntity object : levelEntities) {
-            drawTextureRegionUnscaled(batch, object.getGraphics(), object.getRectangle(), object.getRotation());
+        for (LevelEntity entity : levelEntities) {
+            entity.draw(batch);
         }
-
         // submit all drawing requests
         batch.end();
     }
 
-    public void shiftEntity(LevelEntity levelEntity, GridPoint2 destination, float progress) {
+    public void shiftEntity(LevelEntity levelEntity, Coordinates dest, float progress) {
+        Coordinates coords = levelEntity.getCoordinates();
         tileMovement.moveRectangleBetweenTileCenters(
-                levelEntity.getRectangle(), levelEntity.getCoordinates(), destination, progress
+                levelEntity.getRectangle(), new GridPoint2(coords.x, coords.y), new GridPoint2(dest.x, dest.y), progress
         );
     }
 
@@ -68,7 +69,7 @@ public class LevelRenderer {
         level.dispose();
         batch.dispose();
 
-        for (LevelEntity object : levelEntities)
-            object.dispose();
+        for (LevelEntity entity : levelEntities)
+            entity.dispose();
     }
 }
